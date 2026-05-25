@@ -1,12 +1,33 @@
 import { Link, useRouter } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) {
+        router.navigate({ to: '/admin/' })
+      }
+      setChecking(false)
+    }
+    checkSession()
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.navigate({ to: '/admin/' })
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-400">Memverifikasi sesi...</p>
+      </div>
+    )
   }
 
   return (
@@ -17,22 +38,22 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <p className="text-xs text-white/60 mt-1">Akademi Soft Skills</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             📊 Dashboard
           </Link>
-          <Link to="/admin/orders" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/orders" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             🛒 Orders
           </Link>
-          <Link to="/admin/books" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/books" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             📚 Buku
           </Link>
-          <Link to="/admin/training" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/training" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             🎓 Training
           </Link>
-          <Link to="/admin/audio-video" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/audio-video" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             🎵 Audio & Video
           </Link>
-          <Link to="/admin/articles" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm">
+          <Link to="/admin/articles" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm" activeProps={{ className: 'bg-white/20' }}>
             📝 Artikel
           </Link>
         </nav>

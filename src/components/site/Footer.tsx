@@ -71,6 +71,7 @@ export function Footer() {
           <div className="flex gap-5">
             <a href="#" className="hover:text-white">Privasi</a>
             <a href="#" className="hover:text-white">Syarat & Ketentuan</a>
+            <Link to="/admin/" className="hover:text-white opacity-40 hover:opacity-100 transition">Admin</Link>
           </div>
         </div>
       </div>

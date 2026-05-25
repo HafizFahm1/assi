@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Copy, Check, QrCode, Building2, Wallet, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import { getProduk, rupiah, TRAINING } from "@/lib/site-data";
+import { supabase } from "@/lib/supabase";
 
 const searchSchema = z.object({ produkId: z.string().optional() });
 
@@ -28,6 +29,8 @@ function CheckoutPage() {
   const [metode, setMetode] = useState("qris");
   const [copied, setCopied] = useState(false);
   const [form, setForm] = useState({ nama: "", email: "", wa: "" });
+  const [buktiFile, setBuktiFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const copy = () => {
     navigator.clipboard.writeText("1234567890");
@@ -35,8 +38,37 @@ function CheckoutPage() {
     setTimeout(() => setCopied(false), 1800);
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+
+    let payment_proof_url = '';
+
+    if (buktiFile) {
+      const fileName = `payment-proofs/${Date.now()}_${buktiFile.name}`;
+      const { error } = await supabase.storage.from('payment-proofs').upload(fileName, buktiFile);
+      if (!error) {
+        const { data } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
+        payment_proof_url = data.publicUrl;
+      }
+    }
+
+    const invoiceNo = 'INV-' + Math.floor(Math.random() * 90000000 + 10000000);
+
+    await supabase.from('orders').insert({
+      invoice_no: invoiceNo,
+      product_name: produk.judul,
+      product_type: produk.kategori || 'training',
+      name: form.nama,
+      email: form.email,
+      whatsapp: form.wa,
+      payment_method: metode,
+      payment_proof_url: payment_proof_url || null,
+      status: 'pending',
+      total: produk.harga,
+    });
+
+    setSubmitting(false);
     navigate({ to: "/sukses", search: { produk: produk.judul } });
   };
 
@@ -126,12 +158,19 @@ function CheckoutPage() {
 
               <div className="mt-6">
                 <label className="block text-xs font-semibold text-[var(--brand-navy)] mb-1.5">Upload Bukti Pembayaran</label>
-                <input type="file" accept="image/*" className="w-full text-sm rounded-xl border bg-background px-4 py-3 file:mr-3 file:rounded-full file:border-0 file:bg-[var(--brand-tosca)] file:text-white file:px-3 file:py-1.5 file:text-xs" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setBuktiFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm rounded-xl border bg-background px-4 py-3 file:mr-3 file:rounded-full file:border-0 file:bg-[var(--brand-tosca)] file:text-white file:px-3 file:py-1.5 file:text-xs"
+                />
               </div>
 
               <div className="mt-6 flex gap-3">
                 <button type="button" onClick={() => setStep(1)} className="rounded-full border-2 border-border px-6 py-3 text-sm font-semibold">Kembali</button>
-                <button type="submit" className="flex-1 rounded-full gradient-orange py-3.5 text-sm font-semibold text-white shadow-glow">Konfirmasi Pembayaran</button>
+                <button type="submit" disabled={submitting} className="flex-1 rounded-full gradient-orange py-3.5 text-sm font-semibold text-white shadow-glow disabled:opacity-50">
+                  {submitting ? 'Memproses...' : 'Konfirmasi Pembayaran'}
+                </button>
               </div>
             </form>
           )}
