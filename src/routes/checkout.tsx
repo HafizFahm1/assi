@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check, QrCode, Building2, Wallet, ArrowRight } from "lucide-react";
 import { z } from "zod";
-import { getProduk, rupiah, TRAINING } from "@/lib/site-data";
+import { rupiah } from "@/lib/site-data";
 import { supabase } from "@/lib/supabase";
 
 const searchSchema = z.object({ produkId: z.string().optional() });
@@ -22,15 +22,45 @@ const METODE = [
 
 function CheckoutPage() {
   const { produkId } = Route.useSearch();
-  const produk = getProduk(produkId ?? "") ?? TRAINING[0];
   const navigate = useNavigate();
 
+  const [produk, setProduk] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
   const [metode, setMetode] = useState("qris");
   const [copied, setCopied] = useState(false);
   const [form, setForm] = useState({ nama: "", email: "", wa: "" });
   const [buktiFile, setBuktiFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchProduk = async () => {
+      if (!produkId) { setLoading(false); return; }
+
+      // Cari di semua tabel
+      const tables = [
+        { table: 'books', tipe: 'book' },
+        { table: 'trainings', tipe: 'training' },
+        { table: 'audio_videos', tipe: 'audio-video' },
+      ];
+
+      for (const { table, tipe } of tables) {
+        const { data } = await supabase.from(table).select('*').eq('id', produkId).single();
+        if (data) {
+          setProduk({
+            id: data.id,
+            judul: data.title,
+            harga: data.price,
+            thumb: data.image_url,
+            kategori: tipe,
+          });
+          break;
+        }
+      }
+      setLoading(false);
+    };
+    fetchProduk();
+  }, [produkId]);
 
   const copy = () => {
     navigator.clipboard.writeText("1234567890");
@@ -40,10 +70,10 @@ function CheckoutPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!produk) return;
     setSubmitting(true);
 
     let payment_proof_url = '';
-
     if (buktiFile) {
       const fileName = `payment-proofs/${Date.now()}_${buktiFile.name}`;
       const { error } = await supabase.storage.from('payment-proofs').upload(fileName, buktiFile);
@@ -54,11 +84,10 @@ function CheckoutPage() {
     }
 
     const invoiceNo = 'INV-' + Math.floor(Math.random() * 90000000 + 10000000);
-
     await supabase.from('orders').insert({
       invoice_no: invoiceNo,
       product_name: produk.judul,
-      product_type: produk.kategori || 'training',
+      product_type: produk.kategori,
       name: form.nama,
       email: form.email,
       whatsapp: form.wa,
@@ -71,6 +100,18 @@ function CheckoutPage() {
     setSubmitting(false);
     navigate({ to: "/sukses", search: { produk: produk.judul } });
   };
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-400">Memuat produk...</p>
+    </div>
+  );
+
+  if (!produk) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-400">Produk tidak ditemukan.</p>
+    </div>
+  );
 
   return (
     <section className="mx-auto max-w-6xl px-4 md:px-8 py-12">
@@ -180,7 +221,10 @@ function CheckoutPage() {
         <motion.aside initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-3xl gradient-navy text-white p-6 shadow-elegant h-fit sticky top-28">
           <h3 className="font-bold text-lg">Ringkasan Pesanan</h3>
           <div className="mt-4 rounded-2xl overflow-hidden">
-            <img src={produk.thumb} alt={produk.judul} className="w-full aspect-video object-cover" />
+            {produk.thumb
+              ? <img src={produk.thumb} alt={produk.judul} className="w-full aspect-video object-cover" />
+              : <div className="w-full aspect-video bg-white/10 flex items-center justify-center text-white/40 text-sm">No Image</div>
+            }
           </div>
           <div className="mt-4">
             <div className="font-bold">{produk.judul}</div>
@@ -194,7 +238,7 @@ function CheckoutPage() {
               <span className="text-[var(--brand-lime)]">{rupiah(produk.harga)}</span>
             </div>
           </div>
-          <Link to="/training" className="mt-5 block text-center text-xs text-white/60 hover:text-white">← Lihat training lain</Link>
+          <Link to="/training" className="mt-5 block text-center text-xs text-white/60 hover:text-white">← Lihat produk lain</Link>
         </motion.aside>
       </div>
     </section>

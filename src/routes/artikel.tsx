@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Search, Calendar, User } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -68,27 +68,29 @@ function ArtikelPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {list.map((a: any, i: number) => (
-              <motion.article key={a.id}
-                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="group rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden hover:shadow-elegant transition-all">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  {a.image_url ? (
-                    <img src={a.image_url} alt={a.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-110 duration-700" />
-                  ) : (
-                    <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">No Image</div>
-                  )}
-                  {a.category && <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-bold bg-white/95 text-[var(--brand-navy)]">{a.category}</span>}
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-[var(--brand-navy)] line-clamp-2 leading-snug">{a.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{a.excerpt}</p>
-                  <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><User className="h-3 w-3" />{a.author || '-'}</span>
-                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(a.published_at)}</span>
+              <Link to="/artikel/$id" params={{ id: a.id }} key={a.id} className="block" style={{ cursor: 'pointer', zIndex: 10, position: 'relative' }}>
+                <motion.article
+                  initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden hover:shadow-elegant transition-all cursor-pointer">
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {a.image_url ? (
+                      <img src={a.image_url} alt={a.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-110 duration-700" />
+                    ) : (
+                      <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">No Image</div>
+                    )}
+                    {a.category && <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-bold bg-white/95 text-[var(--brand-navy)]">{a.category}</span>}
                   </div>
-                </div>
-              </motion.article>
+                  <div className="p-5">
+                    <h3 className="font-bold text-[var(--brand-navy)] line-clamp-2 leading-snug">{a.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{a.excerpt}</p>
+                    <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><User className="h-3 w-3" />{a.author || '-'}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(a.published_at)}</span>
+                    </div>
+                  </div>
+                </motion.article>
+              </Link>
             ))}
           </div>
         )}

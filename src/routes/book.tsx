@@ -30,15 +30,15 @@ function BookPage() {
   const list = books.filter((b: any) => b.title.toLowerCase().includes(q.toLowerCase()));
 
   const toProductCard = (b: any) => ({
-    id: b.id,
-    judul: b.title,
-    deskripsi: b.description,
-    harga: b.price,
-    rating: b.rating,
-    badge: b.badge,
-    gambar: b.image_url,
-    tipe: 'book',
-  });
+  id: b.id,
+  judul: b.title,
+  desc: b.description,
+  harga: b.price,
+  rating: b.rating,
+  badge: b.badge,
+  thumb: b.image_url,
+  tipe: 'book',
+});
 
   return (
     <>

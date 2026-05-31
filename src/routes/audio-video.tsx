@@ -26,15 +26,15 @@ function AVPage() {
   }, []);
 
   const toProductCard = (item: any) => ({
-    id: item.id,
-    judul: item.title,
-    deskripsi: item.description,
-    harga: item.price,
-    rating: item.rating,
-    badge: item.badge,
-    gambar: item.image_url,
-    tipe: 'audio-video',
-  });
+  id: item.id,
+  judul: item.title,
+  desc: item.description,
+  harga: item.price,
+  rating: item.rating,
+  badge: item.badge,
+  thumb: item.image_url,
+  tipe: 'audio-video',
+});
 
   return (
     <>

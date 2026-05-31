@@ -19,6 +19,7 @@ import { Route as AudioVideoRouteImport } from './routes/audio-video'
 import { Route as ArtikelRouteImport } from './routes/artikel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ArtikelIdRouteImport } from './routes/artikel.$id'
 import { Route as AdminTrainingRouteImport } from './routes/admin/training'
 import { Route as AdminOrdersRouteImport } from './routes/admin/orders'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
@@ -76,6 +77,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtikelIdRoute = ArtikelIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ArtikelRoute,
+} as any)
 const AdminTrainingRoute = AdminTrainingRouteImport.update({
   id: '/admin/training',
   path: '/admin/training',
@@ -109,7 +115,7 @@ const AdminArticlesRoute = AdminArticlesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/artikel': typeof ArtikelRoute
+  '/artikel': typeof ArtikelRouteWithChildren
   '/audio-video': typeof AudioVideoRoute
   '/book': typeof BookRoute
   '/checkout': typeof CheckoutRoute
@@ -123,11 +129,12 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/training': typeof AdminTrainingRoute
+  '/artikel/$id': typeof ArtikelIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/artikel': typeof ArtikelRoute
+  '/artikel': typeof ArtikelRouteWithChildren
   '/audio-video': typeof AudioVideoRoute
   '/book': typeof BookRoute
   '/checkout': typeof CheckoutRoute
@@ -141,12 +148,13 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/training': typeof AdminTrainingRoute
+  '/artikel/$id': typeof ArtikelIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/artikel': typeof ArtikelRoute
+  '/artikel': typeof ArtikelRouteWithChildren
   '/audio-video': typeof AudioVideoRoute
   '/book': typeof BookRoute
   '/checkout': typeof CheckoutRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/admin/training': typeof AdminTrainingRoute
+  '/artikel/$id': typeof ArtikelIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/orders'
     | '/admin/training'
+    | '/artikel/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/orders'
     | '/admin/training'
+    | '/artikel/$id'
     | '/admin'
   id:
     | '__root__'
@@ -216,12 +227,13 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/orders'
     | '/admin/training'
+    | '/artikel/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ArtikelRoute: typeof ArtikelRoute
+  ArtikelRoute: typeof ArtikelRouteWithChildren
   AudioVideoRoute: typeof AudioVideoRoute
   BookRoute: typeof BookRoute
   CheckoutRoute: typeof CheckoutRoute
@@ -310,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artikel/$id': {
+      id: '/artikel/$id'
+      path: '/$id'
+      fullPath: '/artikel/$id'
+      preLoaderRoute: typeof ArtikelIdRouteImport
+      parentRoute: typeof ArtikelRoute
+    }
     '/admin/training': {
       id: '/admin/training'
       path: '/admin/training'
@@ -355,9 +374,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ArtikelRouteChildren {
+  ArtikelIdRoute: typeof ArtikelIdRoute
+}
+
+const ArtikelRouteChildren: ArtikelRouteChildren = {
+  ArtikelIdRoute: ArtikelIdRoute,
+}
+
+const ArtikelRouteWithChildren =
+  ArtikelRoute._addFileChildren(ArtikelRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ArtikelRoute: ArtikelRoute,
+  ArtikelRoute: ArtikelRouteWithChildren,
   AudioVideoRoute: AudioVideoRoute,
   BookRoute: BookRoute,
   CheckoutRoute: CheckoutRoute,

@@ -30,17 +30,17 @@ function TrainingPage() {
   const list = trainings.filter((t: any) => t.title.toLowerCase().includes(q.toLowerCase()));
 
   const toProductCard = (t: any) => ({
-    id: t.id,
-    judul: t.title,
-    deskripsi: t.description,
-    harga: t.price,
-    rating: t.rating,
-    badge: t.badge,
-    gambar: t.image_url,
-    instruktur: t.instructor,
-    durasi: t.duration,
-    tipe: 'training',
-  });
+  id: t.id,
+  judul: t.title,
+  desc: t.description,
+  harga: t.price,
+  rating: t.rating,
+  badge: t.badge,
+  thumb: t.image_url,
+  mentor: t.instructor,
+  durasi: t.duration,
+  tipe: 'training',
+});
 
   return (
     <>
